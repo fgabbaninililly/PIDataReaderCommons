@@ -30,9 +30,9 @@ namespace PIDataReaderCommons {
 		//private static AutoResetEvent waitMQTTPublishHandle = new AutoResetEvent(false);
 		//private static AutoResetEvent waitPIReadHandle = new AutoResetEvent(false);
 
-		public PIDRController(string mainAssemblyVersionInfo, string piDataReaderLibVersionInfo, bool isWindowsService) {
+		public PIDRController(string mainAssemblyVersionInfo, bool isWindowsService) {
 			this.mainAssemblyVersionInfo = mainAssemblyVersionInfo;
-			this.piDataReaderLibVersionInfo = piDataReaderLibVersionInfo;
+			this.piDataReaderLibVersionInfo = PIDataReaderLib.Version.getVersion();
 			pidrContext = new PIDRContext(isWindowsService);
 		}
 
