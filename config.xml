@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<config test="false"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				xsi:schemaLocation="http://www.w3schools.com http://lillynet.global.lilly.com/sites/DIAMQITCollaborationSite/DIA_Architecture/PIDR/config.xsd">
+	<dateformats pi="dd/MM/yyyy HH:mm:ss" reference="yyyy-MM-ddTHH-mm-ss" hadoop="yyyy-MM-dd HH:mm:ss"/>
+	<maildata enabled="true">
+		<smtphost></smtphost>
+		<from></from>
+		<to></to> <!--Multiple addresses allowed here, separated by ;-->
+		<subject></subject>
+		<body></body>
+	</maildata>
+	<connections>
+		<connection name="mqtt">
+			<parameters>
+				<parameter name="mqttbrokeraddress">yorhdiastreamsclu03.ema.lilly.com</parameter>
+				<parameter name="mqttbrokerport">1883</parameter>
+				<parameter name="mqttclientname">Sesto TAG reader 01</parameter>
+			</parameters>
+		</connection>
+		<connection name="pi">
+			<parameters>
+				<parameter name="piservername">XF2OSIPIDEV01</parameter> <!-- server name should be mapped as an entry in PISDK Utility -->
+				<parameter name="pisdktype">afsdk</parameter> <!-- sdktype can be afsdk or pisdk; afsdk is default, HOWEVER, batches can only be read using pisdk -->
+				<parameter name="piboundarytype">inside</parameter> <!-- boundary can be inside, outside, interpolated; inside is default -->
+			</parameters>
+		</connection>
+	</connections>
+	<read mode="tag"> <!-- mode="tag|batch" -->
+		<readextent type="frequency" slice="1" sliceunit="h"> <!-- readextent type can be frequency, fixed, relative -->
+			<frequency value="100" unit="s" buffer="0"/> <!-- reads 100 time units back from now, repeat every 100 time units; unit can be s(econds), h(ours), d(ays); buffer is used to enlarge the read window by a percentage (by shifting the starting time)-->
+			<!--fixed startdate="2017-02-01T12-00-00" enddate="2017-02-01T14-00-00"/--> <!-- read a fixed date range -->
+			<!--relative readpast="12" unit="h"/--> <!-- read the past 12 time units from now, unit is set to h(ours) -->
+		</readextent>
+		<equipments>
+      <equipment name="Sesto MTC line 1" mqtttopic = "lilly/sesto/line1/MTC">
+				<taglist>[insert your tag list here]</taglist>
+				<phaselist>[if there are phases represented as tags, insert them here]</phaselist>
+      </equipment>
+    </equipments>
+		<!--
+		<batches>
+			<batch modulename="T_ITP_P31" modulepath="Sesto\P31\Filling Line\T_ITP_P31" usebatch="yes" useunitbatch="yes" usesubbatch="yes" usephase="yes" mqtttopic = "lilly/sesto/line1/T_ITP_P31/batchesFix"/>
+			<batch modulename="T_ITP_P10" modulepath="Sesto\P10\Filling Line\T_ITP_P10" usebatch="yes" useunitbatch="yes" usesubbatch="yes" usephase="yes" mqtttopic = "lilly/sesto/line1/T_ITP_P10/batchesFix"/>
+		</batches>
+		-->
+  </read>
+</config>

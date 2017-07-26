@@ -1,0 +1,172 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="config">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="dateformats">
+					<xs:complexType>
+						<xs:attribute name="pi" type="xs:string" use="required" />
+						<xs:attribute name="reference" type="xs:string" use="required" />
+						<xs:attribute name="hadoop" type="xs:string" use="required" />
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="maildata">
+					<xs:complexType>
+					<xs:sequence>
+						<xs:element name="smtphost" type="xs:string"/>
+						<xs:element name="from" type="xs:string"/>
+						<xs:element name="to" type="xs:string"/>
+						<xs:element name="subject" type="xs:string"/>
+						<xs:element name="body" type="xs:string"/>
+					</xs:sequence>
+					<xs:attribute name="enabled" type="xs:boolean" use="required" />
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="connections">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element maxOccurs="unbounded" name="connection">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="parameters">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element maxOccurs="unbounded" name="parameter">
+														<xs:complexType>
+															<xs:simpleContent>
+																<xs:extension base="xs:string">
+																	<xs:attribute name="name" type="xs:string" use="required" />
+																</xs:extension>
+															</xs:simpleContent>
+														</xs:complexType>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+									<xs:attribute name="name" type="xs:string" use="required" />
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="read">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="readextent" minOccurs="0" nillable="true">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:choice>
+											<xs:element name="frequency">
+												<xs:complexType>
+													<xs:attribute name="value" type="xs:unsignedLong" use="required" />
+													<xs:attribute name="unit" type="xs:string" use="required" />
+													<xs:attribute name="buffer" type="xs:unsignedByte" use="required" />
+													<xs:attribute name="limit" type="xs:unsignedLong" use="optional" />
+												</xs:complexType>
+											</xs:element>
+											<xs:element name="fixed">
+												<xs:complexType>
+													<xs:attribute name="startdate" type="xs:string" use="required" />
+													<xs:attribute name="enddate" type="xs:string" use="required" />
+												</xs:complexType>
+											</xs:element>
+											<xs:element name="relative">
+												<xs:complexType>
+													<xs:attribute name="readpast" type="xs:unsignedLong" use="required" />
+													<xs:attribute name="unit" type="xs:string" use="required" />
+												</xs:complexType>
+											</xs:element>
+										</xs:choice>
+									</xs:sequence>
+									<xs:attribute name="type" type="xs:string" use="required" />
+									<xs:attribute name="slice" type="xs:string" use="required" />
+									<xs:attribute name="sliceunit" type="xs:string" use="required" />
+								</xs:complexType>
+							</xs:element>
+							<xs:choice>
+								<xs:element name="equipments">
+									<xs:complexType>
+										<xs:sequence>
+											<xs:element name="equipment">
+													<xs:complexType>
+														<xs:sequence>
+															<xs:element name="taglist" type="xs:string" />
+															<xs:element name="phaselist" type="xs:string" />
+														</xs:sequence>
+														<xs:attribute name="name" type="xs:string" use="required" />
+														<xs:attribute name="mqtttopic" type="xs:string" use="required" />
+													</xs:complexType>
+												</xs:element>
+										</xs:sequence>
+									</xs:complexType>
+								</xs:element>
+								<xs:element name="batches">
+									<xs:complexType>
+										<xs:sequence>
+											<xs:element maxOccurs="unbounded" name="batch">
+												<xs:complexType>
+													<xs:attribute name="modulename" type="xs:string" use="required" />
+													<xs:attribute name="modulepath" type="xs:string" use="required" />
+													<xs:attribute name="usebatch" type="xs:string" use="required" />
+													<xs:attribute name="useunitbatch" type="xs:string" use="required" />
+													<xs:attribute name="usesubbatch" type="xs:string" use="required" />
+													<xs:attribute name="usephase" type="xs:string" use="required" />
+													<xs:attribute name="mqtttopic" type="xs:string" use="required" />
+												</xs:complexType>
+											</xs:element>
+										</xs:sequence>
+									</xs:complexType>
+								</xs:element>
+								<xs:element name="afelements">
+									<xs:complexType>
+										<xs:sequence>
+											<xs:element maxOccurs="unbounded" name="afelement">
+												<xs:complexType>
+													<xs:attribute name="path" type="xs:string" use="required" />
+												</xs:complexType>
+											</xs:element>
+										</xs:sequence>
+									</xs:complexType>
+								</xs:element>
+							</xs:choice>
+						</xs:sequence>
+						<xs:attribute name="mode" type="xs:string" use="required" />
+					</xs:complexType>
+				</xs:element>
+				<!--
+				<xs:element name="outputchannels">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element maxOccurs="unbounded" name="outputchannel">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="parameters">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element maxOccurs="unbounded" name="parameter">
+														<xs:complexType>
+															<xs:simpleContent>
+																<xs:extension base="xs:string">
+																	<xs:attribute name="name" type="xs:string" use="required" />
+																</xs:extension>
+															</xs:simpleContent>
+														</xs:complexType>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+									<xs:attribute name="name" type="xs:string" use="required" />
+									<xs:attribute name="connection" type="xs:string" use="required" />
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			-->
+			</xs:sequence>
+			<xs:attribute name="test" type="xs:boolean" use="required" />
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
