@@ -25,11 +25,6 @@ namespace PIDataReaderCommons {
 
 		private System.Timers.Timer timer;
 		
-		//private static AutoResetEvent waitTimerDisposedHandle = new AutoResetEvent(false);
-		//private static AutoResetEvent waitMQTTCloseHandle = new AutoResetEvent(false);
-		//private static AutoResetEvent waitMQTTPublishHandle = new AutoResetEvent(false);
-		//private static AutoResetEvent waitPIReadHandle = new AutoResetEvent(false);
-
 		public PIDRController(string mainAssemblyVersionInfo, bool isWindowsService) {
 			this.mainAssemblyVersionInfo = mainAssemblyVersionInfo;
 			this.piDataReaderLibVersionInfo = PIDataReaderLib.Version.getVersion();
@@ -125,13 +120,6 @@ namespace PIDataReaderCommons {
 
 			fileWriter = pidrContext.getFileWriter();
 
-			/*
-			if (pidrContext.getIsWindowsService()) {
-				startTimer();
-			} else {
-				startOneShot();
-			}
-			*/
 			if (pidrContext.getIsReadExtentFrequency()) {
 				startTimer();
 			} else {
@@ -209,8 +197,6 @@ namespace PIDataReaderCommons {
 						if (dumpReadsToLocalFiles) {
 							fileWriter.writeTags(piDataMap, appendToLocalFiles);
 						}
-					} else {
-						//waitMQTTPublishHandle.Set();
 					}
 				}
 			} catch (Exception ex) {
@@ -241,7 +227,6 @@ namespace PIDataReaderCommons {
 			if (null != mqttWriter) {
 				mqttWriter.close();
 			}
-			//waitTimerDisposedHandle.Set();
 		}
 
 		private void Reader_PIReadTerminated(PIReadTerminatedEventArgs e) {
@@ -251,7 +236,6 @@ namespace PIDataReaderCommons {
 				overallReadTime += e.readTimesByEquipment[eqmName];
 			}
 			logger.Info("Total time required for reading {0} equipments/modules: {1}", e.readTimesByEquipment.Count, overallReadTime);
-			//waitPIReadHandle.Set();
 		}
 
 		private void MQTTWriter_PublishCompleted(MQTTPublishTerminatedEventArgs e) {
@@ -267,15 +251,11 @@ namespace PIDataReaderCommons {
 					logger.Warn("TIME REQUIRED FOR READING AND POSTING EXCEEDS SCHEDULE PERIOD: RISK OF LOSING DATA AND/OR OVERLOADING MQTT BROKER!");
 				}
 			}
-			//waitMQTTPublishHandle.Set();
 		}
 
 		private void MqttWriter_MQTTWriter_ClientClosed(MQTTClientClosedEventArgs e) {
-			//waitMQTTCloseHandle.Set();
 		}
-
 		
-
 		#endregion
 	}
 }
