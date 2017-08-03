@@ -163,8 +163,8 @@ namespace PIDataReaderCommons {
 			timer.Interval = re.readExtentFrequency.getReadBackSecondsAsDouble() * 1000;
 			timer.Elapsed += Timer_Elapsed;
 			timer.Disposed += Timer_Disposed;
-			timer.Start();
 			readAndWrite();
+			timer.Start();
 		}
 
 		private void startOneShot() {
