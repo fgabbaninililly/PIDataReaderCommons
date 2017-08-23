@@ -25,11 +25,6 @@ namespace PIDataReaderCommons {
 
 		private System.Timers.Timer timer;
 		
-		//private static AutoResetEvent waitTimerDisposedHandle = new AutoResetEvent(false);
-		//private static AutoResetEvent waitMQTTCloseHandle = new AutoResetEvent(false);
-		//private static AutoResetEvent waitMQTTPublishHandle = new AutoResetEvent(false);
-		//private static AutoResetEvent waitPIReadHandle = new AutoResetEvent(false);
-
 		public PIDRController(string mainAssemblyVersionInfo, bool isWindowsService) {
 			this.mainAssemblyVersionInfo = mainAssemblyVersionInfo;
 			this.piDataReaderLibVersionInfo = PIDataReaderLib.Version.getVersion();
@@ -41,6 +36,7 @@ namespace PIDataReaderCommons {
 			bool cmdLineParseOk = CommandLine.Parser.Default.ParseArguments(args, options);
 			if (options.Version) {
 				logger.Info("{0}", mainAssemblyVersionInfo);
+				logger.Info("{0}", Version.getVersion());
 				logger.Info("{0}", piDataReaderLibVersionInfo);
 				return ExitCodes.EXITCODE_VERSION;
 			}
@@ -76,6 +72,7 @@ namespace PIDataReaderCommons {
 
 			logger.Info(">>>Starting reader<<<");
 			logger.Info("{0}", mainAssemblyVersionInfo);
+			logger.Info("{0}", Version.getVersion());
 			logger.Info("{0}", piDataReaderLibVersionInfo);
 			logger.Info("Log file redirected to {0}", currentWorkingFolder + @"\_logs\");
 			
@@ -121,23 +118,15 @@ namespace PIDataReaderCommons {
 			mqttWriter.MQTTWriter_PublishCompleted += MQTTWriter_PublishCompleted;
 			mqttWriter.MQTTWriter_ClientClosed += MqttWriter_MQTTWriter_ClientClosed;
 			logger.Info("MQTT data writer was successfully created");
-			logger.Info("MQTT client name is {0}", mqttWriter.getClientName());
+			logger.Info("MQTT client ID is {0}", mqttWriter.getClientName());
 
 			fileWriter = pidrContext.getFileWriter();
 
-			/*
-			if (pidrContext.getIsWindowsService()) {
-				startTimer();
-			} else {
-				startOneShot();
-			}
-			*/
 			if (pidrContext.getIsReadExtentFrequency()) {
 				startTimer();
 			} else {
 				startOneShot();
 			}
-
 
 			return ExitCodes.EXITCODE_SUCCESS;
 		}
@@ -175,8 +164,8 @@ namespace PIDataReaderCommons {
 			timer.Interval = re.readExtentFrequency.getReadBackSecondsAsDouble() * 1000;
 			timer.Elapsed += Timer_Elapsed;
 			timer.Disposed += Timer_Disposed;
-			timer.Start();
 			readAndWrite();
+			timer.Start();
 		}
 
 		private void startOneShot() {
@@ -209,8 +198,6 @@ namespace PIDataReaderCommons {
 						if (dumpReadsToLocalFiles) {
 							fileWriter.writeTags(piDataMap, appendToLocalFiles);
 						}
-					} else {
-						//waitMQTTPublishHandle.Set();
 					}
 				}
 			} catch (Exception ex) {
@@ -237,11 +224,10 @@ namespace PIDataReaderCommons {
 		}
 
 		private void Timer_Disposed(object sender, EventArgs e) {
-			logger.Trace("Timer disposed");
+			logger.Info("Timer disposed");
 			if (null != mqttWriter) {
 				mqttWriter.close();
 			}
-			//waitTimerDisposedHandle.Set();
 		}
 
 		private void Reader_PIReadTerminated(PIReadTerminatedEventArgs e) {
@@ -251,7 +237,6 @@ namespace PIDataReaderCommons {
 				overallReadTime += e.readTimesByEquipment[eqmName];
 			}
 			logger.Info("Total time required for reading {0} equipments/modules: {1}", e.readTimesByEquipment.Count, overallReadTime);
-			//waitPIReadHandle.Set();
 		}
 
 		private void MQTTWriter_PublishCompleted(MQTTPublishTerminatedEventArgs e) {
@@ -267,15 +252,11 @@ namespace PIDataReaderCommons {
 					logger.Warn("TIME REQUIRED FOR READING AND POSTING EXCEEDS SCHEDULE PERIOD: RISK OF LOSING DATA AND/OR OVERLOADING MQTT BROKER!");
 				}
 			}
-			//waitMQTTPublishHandle.Set();
 		}
 
 		private void MqttWriter_MQTTWriter_ClientClosed(MQTTClientClosedEventArgs e) {
-			//waitMQTTCloseHandle.Set();
 		}
-
 		
-
 		#endregion
 	}
 }

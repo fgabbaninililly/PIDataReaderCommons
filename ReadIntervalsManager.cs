@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace PIDataReaderCommons {
-	public class ReadIntervalsManager {
+	internal class ReadIntervalsManager {
 		private static Logger logger = LogManager.GetCurrentClassLogger();
 		private Dictionary<string, ReadInterval> nextReadIntervalsByEquipment;
 
@@ -72,13 +72,13 @@ namespace PIDataReaderCommons {
 			DateTime startTimeFromConfig = setupStartTime(config.read.readExtent, config.dateFormats.reference, nowDT);
 			DateTime endTimeFromConfig = setupEndTime(config.read.readExtent, config.dateFormats.reference, nowDT);
 
-			logger.Trace("Read interval (from configuration file parameters) is: [{0}, {1}]", startTimeFromConfig.ToString(config.dateFormats.reference), endTimeFromConfig.ToString(config.dateFormats.reference));
+			logger.Info("Read interval (from configuration file parameters) is: [{0}, {1}]", startTimeFromConfig.ToString(config.dateFormats.reference), endTimeFromConfig.ToString(config.dateFormats.reference));
 
 			foreach (string eqmName in nextReadIntervalsByEquipment.Keys) {
 				ReadInterval ri = nextReadIntervalsByEquipment[eqmName];
 				if (ri.end < startTimeFromConfig) {
 					ri.start = ri.end;
-					logger.Trace("End time of previous interval is before start of next interval. Risk of losing data. Adjusted next read intervals.");
+					logger.Info("End time of previous interval is before start of next interval. Risk of losing data. Adjusted next read intervals.");
 				}
 				ri.end = endTimeFromConfig;
 			}
