@@ -36,6 +36,7 @@ namespace PIDataReaderCommons {
 			bool cmdLineParseOk = CommandLine.Parser.Default.ParseArguments(args, options);
 			if (options.Version) {
 				logger.Info("{0}", mainAssemblyVersionInfo);
+				logger.Info("{0}", Version.getVersion());
 				logger.Info("{0}", piDataReaderLibVersionInfo);
 				return ExitCodes.EXITCODE_VERSION;
 			}
@@ -71,6 +72,7 @@ namespace PIDataReaderCommons {
 
 			logger.Info(">>>Starting reader<<<");
 			logger.Info("{0}", mainAssemblyVersionInfo);
+			logger.Info("{0}", Version.getVersion());
 			logger.Info("{0}", piDataReaderLibVersionInfo);
 			logger.Info("Log file redirected to {0}", currentWorkingFolder + @"\_logs\");
 			
@@ -116,7 +118,7 @@ namespace PIDataReaderCommons {
 			mqttWriter.MQTTWriter_PublishCompleted += MQTTWriter_PublishCompleted;
 			mqttWriter.MQTTWriter_ClientClosed += MqttWriter_MQTTWriter_ClientClosed;
 			logger.Info("MQTT data writer was successfully created");
-			logger.Info("MQTT client name is {0}", mqttWriter.getClientName());
+			logger.Info("MQTT client ID is {0}", mqttWriter.getClientName());
 
 			fileWriter = pidrContext.getFileWriter();
 
@@ -125,7 +127,6 @@ namespace PIDataReaderCommons {
 			} else {
 				startOneShot();
 			}
-
 
 			return ExitCodes.EXITCODE_SUCCESS;
 		}
@@ -223,7 +224,7 @@ namespace PIDataReaderCommons {
 		}
 
 		private void Timer_Disposed(object sender, EventArgs e) {
-			logger.Trace("Timer disposed");
+			logger.Info("Timer disposed");
 			if (null != mqttWriter) {
 				mqttWriter.close();
 			}
