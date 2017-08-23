@@ -9,7 +9,7 @@ namespace PIDataReaderCommons {
 		public static readonly string version = "1.0.0";
 
 		public static string getVersion() {
-			return string.Format("PIDataReaderCommons version {0}", version);
+			return string.Format("PIDataReader Common Classes v{0}", version);
 		}
 	}
 }
