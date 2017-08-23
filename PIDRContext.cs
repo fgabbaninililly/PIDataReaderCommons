@@ -8,20 +8,7 @@ using System.Threading.Tasks;
 
 namespace PIDataReaderCommons
 {
-	public class ExitCodes {
-		public static readonly int EXITCODE_SUCCESS = 0;
-		public static readonly int EXITCODE_INVALIDCOMMANDLINE = -1;
-		public static readonly int EXITCODE_INVALIDCONFIG = -2;
-		public static readonly int EXITCODE_INVALIDREADINTERVALS = -3;
-		public static readonly int EXITCODE_CANNOTCREATEREADER = -4;
-		public static readonly int EXITCODE_CANNOTCREATEWRITER = -5;
-		public static readonly int EXITCODE_CANNOTCREATEMAILER = -6;
-		public static readonly int EXITCODE_VERSION = -7;
-		public static readonly int EXITCODE_INVALIDREADEXTENT = -8;
-		public static readonly int EXITCODE_INVALIDXMLINCONFIG = -9;
-	}
-
-    public class PIDRContext
+	internal class PIDRContext
     {
 		private static Logger logger = LogManager.GetCurrentClassLogger();
 		private PIReaderConfig config;
@@ -137,7 +124,7 @@ namespace PIDataReaderCommons
 			}
 
 			Connection mqttConnection = config.getConnectionByName("mqtt");
-			string clientName = Utils.md5Calc(machineName + configFileFullPath);
+			string clientName = "." + Utils.md5Calc(machineName + configFileFullPath);
 			try {
 				clientName = mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTCLIENTNAME) + clientName;
 				mqttWriter = new MQTTWriter(

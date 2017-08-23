@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace PIDataReaderCommons {
-	public class Mailer {
+	internal class Mailer {
 		private static Logger logger = LogManager.GetCurrentClassLogger();
 
 		private string smtpHost;

@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace PIDataReaderCommons {
-	public class Options {
+	internal class Options {
 		[Option('c', "config", Required = true, HelpText = "Full path to configuration file")]
 		public string ConfigFileFullPath { get; set; }
 
