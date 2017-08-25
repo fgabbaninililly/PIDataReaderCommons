@@ -8,19 +8,23 @@
 		<from></from>
 		<to></to> <!--Multiple addresses allowed here, separated by ;-->
 		<subject></subject>
-		<body></body>
+		<body>PI DataReader was stopped. Details:
+- Running on: [[machinename]]
+- Instance: [[mqttclientname]]
+- Time: [[time]]
+		</body>
 	</maildata>
 	<connections>
 		<connection name="mqtt">
 			<parameters>
-				<parameter name="mqttbrokeraddress">yorhdiastreamsclu03.ema.lilly.com</parameter>
+				<parameter name="mqttbrokeraddress">[address to MQTT broker]</parameter>
 				<parameter name="mqttbrokerport">1883</parameter>
-				<parameter name="mqttclientname">Sesto TAG reader 01</parameter>
+				<parameter name="mqttclientname">Sample reader 01</parameter>
 			</parameters>
 		</connection>
 		<connection name="pi">
 			<parameters>
-				<parameter name="piservername">XF2OSIPIDEV01</parameter> <!-- server name should be mapped as an entry in PISDK Utility -->
+				<parameter name="piservername">[pi server name]</parameter> <!-- server name should be mapped as an entry in PISDK Utility -->
 				<parameter name="pisdktype">afsdk</parameter> <!-- sdktype can be afsdk or pisdk; afsdk is default, HOWEVER, batches can only be read using pisdk -->
 				<parameter name="piboundarytype">inside</parameter> <!-- boundary can be inside, outside, interpolated; inside is default -->
 			</parameters>
@@ -33,7 +37,7 @@
 			<!--relative readpast="12" unit="h"/--> <!-- read the past 12 time units from now, unit is set to h(ours) -->
 		</readextent>
 		<equipments>
-      <equipment name="Sesto MTC line 1" mqtttopic = "lilly/sesto/line1/MTC">
+      <equipment name="Sample equipment" mqtttopic = "sample/topic">
 				<taglist>[insert your tag list here]</taglist>
 				<phaselist>[if there are phases represented as tags, insert them here]</phaselist>
       </equipment>
