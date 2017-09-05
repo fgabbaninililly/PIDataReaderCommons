@@ -2,8 +2,9 @@
 using PIDataReaderLib;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
-using System.Timers;
+using System.Threading;
 
 namespace PIDataReaderCommons {
 	public class PIDRController {
@@ -23,8 +24,9 @@ namespace PIDataReaderCommons {
 		private FileWriter fileWriter;
 		private Options options;
 
-		private System.Timers.Timer timer;
-		
+		private Timer timer;
+		private UInt32 timerPeriod;
+
 		public PIDRController(string mainAssemblyVersionInfo, bool isWindowsService) {
 			this.mainAssemblyVersionInfo = mainAssemblyVersionInfo;
 			this.piDataReaderLibVersionInfo = PIDataReaderLib.Version.getVersion();
@@ -132,7 +134,8 @@ namespace PIDataReaderCommons {
 		}
 
 		public int stop() {
-			timer.Stop();
+			timer.Change(Timeout.Infinite, Timeout.Infinite);
+			timer.Dispose();
 			logger.Info("Timer was stopped");
 			return ExitCodes.EXITCODE_SUCCESS;
 		}
@@ -160,12 +163,11 @@ namespace PIDataReaderCommons {
 		private void startTimer() {
 			logger.Info("Start running using scheduled timer");
 			ReadExtent re = pidrContext.getConfig().read.readExtent;
-			timer = new System.Timers.Timer();
-			timer.Interval = re.readExtentFrequency.getReadBackSecondsAsDouble() * 1000;
-			timer.Elapsed += Timer_Elapsed;
-			timer.Disposed += Timer_Disposed;
+
 			readAndWrite();
-			timer.Start();
+
+			timerPeriod = (UInt32)(re.readExtentFrequency.getReadBackSecondsAsDouble() * 1000);
+			timer = new Timer(Timer_Elapsed, 0, timerPeriod, timerPeriod);
 		}
 
 		private void startOneShot() {
@@ -217,10 +219,27 @@ namespace PIDataReaderCommons {
 		}
 
 		#region event handlers
-		private void Timer_Elapsed(object sender, ElapsedEventArgs e) {
+		private void Timer_Elapsed(Object state) {
 			logger.Trace("Timer elapsed");
+			timer.Change(Timeout.Infinite, Timeout.Infinite);
+
+			Stopwatch sw = new Stopwatch();
+			sw.Start();
+
 			pidrContext.setupReadIntervals();
 			readAndWrite();
+
+			sw.Stop();
+			long elapsedMS = sw.ElapsedMilliseconds;
+			long nextTimerStart = Math.Max(0, timerPeriod - elapsedMS);
+
+			//Trigger next timer:
+			//1. immediately (nextTimerStart = 0), if the previous execution took more than timerPeriod
+			//2. after timerPeriod - elapsedMS, if the previous run took less than timerPeriod
+			//We are trying to run the timer following its originally scheduled period, but we want the next execution to be 
+			//started only when the previous one is completed.
+
+			timer.Change(nextTimerStart, timerPeriod);
 		}
 
 		private void Timer_Disposed(object sender, EventArgs e) {
