@@ -76,10 +76,13 @@ namespace PIDataReaderCommons {
 
 			foreach (string eqmName in nextReadIntervalsByEquipment.Keys) {
 				ReadInterval ri = nextReadIntervalsByEquipment[eqmName];
+				
 				if (ri.end < startTimeFromConfig) {
-					ri.start = ri.end;
-					logger.Info("End time of previous interval is before start of next interval. Risk of losing data. Adjusted next read intervals.");
+					logger.Info("End time of previous interval is before start of next interval. Risk of losing data. Adjusted next read interval.");
+				} else {
+					logger.Trace("Start time of next interval is before end of previous interval. Adjusted next read interval.");
 				}
+				ri.start = ri.end;
 				ri.end = endTimeFromConfig;
 			}
 		}
