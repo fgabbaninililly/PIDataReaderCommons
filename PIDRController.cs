@@ -117,6 +117,11 @@ namespace PIDataReaderCommons {
 
 			mqttWriter = pidrContext.getMqttWriter();
 			mqttWriter.initAndConnect();
+
+			if (!mqttWriter.isConnected()) {
+				return ExitCodes.EXITCODE_CANNOTCONNECTTOBROKER;
+			}
+
 			mqttWriter.MQTTWriter_PublishCompleted += MQTTWriter_PublishCompleted;
 			mqttWriter.MQTTWriter_ClientClosed += MqttWriter_MQTTWriter_ClientClosed;
 			logger.Info("MQTT data writer was successfully created");

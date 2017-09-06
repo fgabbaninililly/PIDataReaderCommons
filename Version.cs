@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PIDataReaderCommons {
 	public class Version {
-		public static readonly string version = "1.2.0";
+		public static readonly string version = "1.3.0";
 
 		public static string getVersion() {
 			return string.Format("PIDataReader Common Classes v{0}", version);

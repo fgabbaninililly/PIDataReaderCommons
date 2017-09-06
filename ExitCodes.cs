@@ -18,6 +18,7 @@ namespace PIDataReaderCommons {
 		public static readonly int EXITCODE_VERSION = -7;
 		public static readonly int EXITCODE_INVALIDREADEXTENT = -8;
 		public static readonly int EXITCODE_INVALIDXMLINCONFIG = -9;
+		public static readonly int EXITCODE_CANNOTCONNECTTOBROKER = -10;
 
 		private ExitCodes() {
 			this.Add(EXITCODE_SUCCESS, "Success");
@@ -30,6 +31,7 @@ namespace PIDataReaderCommons {
 			this.Add(EXITCODE_VERSION, "Exe launched with version option");
 			this.Add(EXITCODE_INVALIDREADEXTENT, "Invalid read extent");
 			this.Add(EXITCODE_INVALIDXMLINCONFIG, "Invalid XML in config file");
+			this.Add(EXITCODE_CANNOTCONNECTTOBROKER, "MQTT client was unable to connect to broker");
 		}
 
 		public static ExitCodes Instance {
@@ -43,5 +45,7 @@ namespace PIDataReaderCommons {
 				return instance;
 			}
 		}
+
+		
 	}
 }
