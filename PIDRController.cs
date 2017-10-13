@@ -52,6 +52,7 @@ namespace PIDataReaderCommons {
 
 		private int setupOptions() {
 			if (!File.Exists(options.ConfigFileFullPath)) {
+				logger.Fatal("Cannot find valid configuration file at {0}", options.ConfigFileFullPath);
 				return ExitCodes.EXITCODE_INVALIDCONFIG;
 			}
 			
