@@ -17,6 +17,7 @@
 	<connections>
 		<connection name="mqtt">
 			<parameters>
+				<parameter name="mqttclienttype">[client type]</parameter><!-- can be MQTTnet or M2Mqtt -->
 				<parameter name="mqttbrokeraddress">[address to MQTT broker]</parameter>
 				<parameter name="mqttbrokerport">1883</parameter>
 				<parameter name="mqttclientname">Sample reader 01</parameter>
