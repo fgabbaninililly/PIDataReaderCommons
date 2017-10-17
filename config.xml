@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <config test="false"
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-				xsi:schemaLocation="http://www.w3schools.com http://lillynet.global.lilly.com/sites/DIAMQITCollaborationSite/DIA_Architecture/PIDR/config.xsd">
+				xsi:schemaLocation="http://www.w3schools.com file:///D:\Projects\DOTNET\PIDataReaderApps\PIDataReaderCommons\config.xsd">
 	<dateformats pi="dd/MM/yyyy HH:mm:ss" reference="yyyy-MM-ddTHH-mm-ss" hadoop="yyyy-MM-dd HH:mm:ss"/>
 	<maildata enabled="true">
 		<smtphost></smtphost>
@@ -17,6 +17,7 @@
 	<connections>
 		<connection name="mqtt">
 			<parameters>
+				<parameter name="mqttclienttype">[client type]</parameter><!-- can be MQTTnet or M2Mqtt -->
 				<parameter name="mqttbrokeraddress">[address to MQTT broker]</parameter>
 				<parameter name="mqttbrokerport">1883</parameter>
 				<parameter name="mqttclientname">Sample reader 01</parameter>
@@ -25,7 +26,7 @@
 		<connection name="pi">
 			<parameters>
 				<parameter name="piservername">[pi server name]</parameter> <!-- server name should be mapped as an entry in PISDK Utility -->
-				<parameter name="pisdktype">afsdk</parameter> <!-- sdktype can be afsdk or pisdk; afsdk is default, HOWEVER, batches can only be read using pisdk -->
+				<parameter name="pisdktype">[sdk type]</parameter> <!-- sdktype can be afsdk or pisdk or oledb; afsdk is default, HOWEVER, batches can only be read using pisdk or oledb -->
 				<parameter name="piboundarytype">inside</parameter> <!-- boundary can be inside, outside, interpolated; inside is default -->
 			</parameters>
 		</connection>
@@ -44,8 +45,8 @@
     </equipments>
 		<!--
 		<batches>
-			<batch modulename="T_ITP_P31" modulepath="Sesto\P31\Filling Line\T_ITP_P31" usebatch="yes" useunitbatch="yes" usesubbatch="yes" usephase="yes" mqtttopic = "lilly/sesto/line1/T_ITP_P31/batchesFix"/>
-			<batch modulename="T_ITP_P10" modulepath="Sesto\P10\Filling Line\T_ITP_P10" usebatch="yes" useunitbatch="yes" usesubbatch="yes" usephase="yes" mqtttopic = "lilly/sesto/line1/T_ITP_P10/batchesFix"/>
+			<batch modulename="T_ITP_P31" modulepath="Sesto\P31\Filling Line\T_ITP_P31" mqtttopic = "lilly/sesto/line1/T_ITP_P31/batchesFix"/>
+			<batch modulename="T_ITP_P10" modulepath="Sesto\P10\Filling Line\T_ITP_P10" mqtttopic = "lilly/sesto/line1/T_ITP_P10/batchesFix"/>
 		</batches>
 		-->
   </read>

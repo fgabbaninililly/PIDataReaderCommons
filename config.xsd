@@ -108,10 +108,6 @@
 												<xs:complexType>
 													<xs:attribute name="modulename" type="xs:string" use="required" />
 													<xs:attribute name="modulepath" type="xs:string" use="required" />
-													<xs:attribute name="usebatch" type="xs:string" use="required" />
-													<xs:attribute name="useunitbatch" type="xs:string" use="required" />
-													<xs:attribute name="usesubbatch" type="xs:string" use="required" />
-													<xs:attribute name="usephase" type="xs:string" use="required" />
 													<xs:attribute name="mqtttopic" type="xs:string" use="required" />
 												</xs:complexType>
 											</xs:element>

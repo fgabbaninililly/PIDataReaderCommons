@@ -20,7 +20,7 @@ namespace PIDataReaderCommons {
 
 		private PIDRContext pidrContext;
 		private Reader reader;
-		private MQTTWriter mqttWriter;
+		private AbstractMQTTWriter mqttWriter;
 		private FileWriter fileWriter;
 		private Options options;
 
@@ -52,6 +52,7 @@ namespace PIDataReaderCommons {
 
 		private int setupOptions() {
 			if (!File.Exists(options.ConfigFileFullPath)) {
+				logger.Fatal("Cannot find valid configuration file at {0}", options.ConfigFileFullPath);
 				return ExitCodes.EXITCODE_INVALIDCONFIG;
 			}
 			
@@ -124,6 +125,7 @@ namespace PIDataReaderCommons {
 
 			mqttWriter.MQTTWriter_PublishCompleted += MQTTWriter_PublishCompleted;
 			mqttWriter.MQTTWriter_ClientClosed += MqttWriter_MQTTWriter_ClientClosed;
+
 			logger.Info("MQTT data writer was successfully created");
 			logger.Info("MQTT client ID is {0}", mqttWriter.getClientName());
 
@@ -268,7 +270,7 @@ namespace PIDataReaderCommons {
 
 			logger.Info("Total time required for publish: {0}s", e.elapsedTimeSec.ToString());
 			logger.Info("Total time required for reading and publishing: {0}s", totalReadAndPublishTimeSec);
-			logger.Info("Throughput in this scheduled run was: {0} bytes/s", e.throughput.ToString("F2"));
+			logger.Info("Network throughput in this run was: {0} bytes/s", e.throughput.ToString("F2"));
 			PIReaderConfig config = pidrContext.getConfig();
 			if (config.read.readExtent.type.ToLower().Equals(ReadExtent.READ_EXTENT_FREQUENCY)) {
 				double scheduleAsSec = config.read.readExtent.readExtentFrequency.getFrequencySecondsAsDouble();

@@ -14,7 +14,7 @@ namespace PIDataReaderCommons
 		private PIReaderConfig config;
 		private string configFileFullPath;
 		private Reader reader;
-		private MQTTWriter mqttWriter;
+		private AbstractMQTTWriter mqttWriter;
 		private string machineName = Environment.MachineName;
 		private FileWriter fileWriter;
 		private Dictionary<string, string> topicsMap;
@@ -64,7 +64,7 @@ namespace PIDataReaderCommons
 			return fileWriter;
 		}
 
-		public MQTTWriter getMqttWriter() {
+		public AbstractMQTTWriter getMqttWriter() {
 			return mqttWriter;
 		}
 
@@ -125,14 +125,16 @@ namespace PIDataReaderCommons
 
 			Connection mqttConnection = config.getConnectionByName("mqtt");
 			string clientName = "." + Utils.md5Calc(machineName + configFileFullPath);
+			string brokerAddress = mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTBROKERADDRESS);
+			string brokerPort = mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTBROKERPORT);
 			try {
 				clientName = mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTCLIENTNAME) + clientName;
-				mqttWriter = new MQTTWriter(
-						mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTBROKERADDRESS),
-						mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTBROKERPORT),
-						clientName
-						);
-				
+				if(null != mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTCLIENTTYPE) &&
+					mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTCLIENTTYPE).Equals(Parameter.PARAM_VALUE_MQTTCLIENTTYPE_MQTTNET)) {
+					mqttWriter = MQTTWriterFactory.createMQTTNet(brokerAddress, brokerPort, clientName);
+				} else {
+					mqttWriter = MQTTWriterFactory.createM2MQTT(brokerAddress, brokerPort, clientName);
+				}
 			} catch (Exception) {
 				logger.Fatal("Unable to create MQTT writer. Program will abort.");
 				return ExitCodes.EXITCODE_CANNOTCREATEWRITER;
