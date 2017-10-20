@@ -192,20 +192,32 @@ namespace PIDataReaderCommons {
 			try {
 				if (config.read.readMode.Equals(Read.READMODE_BATCH)) {
 					logger.Info("Reading batch information");
-					piDataMap = reader.readBatches(config, pidrContext.getNextreadIntervalsByEquipment());
-					writeReadFinishedToLog(piDataMap);
-					mqttWriter.write(piDataMap, topicsMap);
-					if (dumpReadsToLocalFiles) {
-						fileWriter.writeBatches(piDataMap, appendToLocalFiles);
+					//for each module and for each interval
+					foreach (BatchCfg batchCfg in config.read.batches) {
+						List<ReadInterval> readIntervals = pidrContext.getNextReadIntervalsByEquipment()[batchCfg.moduleName];
+						foreach (ReadInterval readInterval in readIntervals) { 
+							piDataMap = reader.readBatches(batchCfg, readInterval);
+							writeReadFinishedToLog(piDataMap);
+							mqttWriter.write(piDataMap, topicsMap);
+							if (dumpReadsToLocalFiles) {
+								fileWriter.writeBatches(piDataMap, appendToLocalFiles);
+							}
+						}
 					}
 				} else {
 					logger.Info("Reading tag information");
-					piDataMap = reader.readTags(config, pidrContext.getNextreadIntervalsByEquipment());
-					if (piDataMap.Count > 0) {
-						writeReadFinishedToLog(piDataMap);
-						mqttWriter.write(piDataMap, topicsMap);
-						if (dumpReadsToLocalFiles) {
-							fileWriter.writeTags(piDataMap, appendToLocalFiles);
+					//for each equipment and for each interval
+					foreach (EquipmentCfg equipmentCfg in config.read.equipments) {
+						List<ReadInterval> readIntervals = pidrContext.getNextReadIntervalsByEquipment()[equipmentCfg.name];
+						foreach (ReadInterval readInterval in readIntervals) {
+							piDataMap = reader.readTags(equipmentCfg, readInterval);
+							if (piDataMap.Count > 0) {
+								writeReadFinishedToLog(piDataMap);
+								mqttWriter.write(piDataMap, topicsMap);
+								if (dumpReadsToLocalFiles) {
+									fileWriter.writeTags(piDataMap, appendToLocalFiles);
+								}
+							}
 						}
 					}
 				}
