@@ -18,7 +18,7 @@ namespace PIDataReaderCommons
 		private string machineName = Environment.MachineName;
 		private FileWriter fileWriter;
 		private Dictionary<string, string> topicsMap;
-		private Dictionary<string, ReadInterval> nextReadIntervalsByEquipment;
+		private Dictionary<string, List<ReadInterval>> nextReadIntervalsByEquipment;
 		Dictionary<string, string> lastReadTimesByEquipment;
 		private ReadIntervalsManager readIntervalsMgr = new ReadIntervalsManager();
 		private Mailer mailer;
@@ -53,7 +53,7 @@ namespace PIDataReaderCommons
 			readIntervalsMgr.setupReadIntervals(config, lastReadTimesByEquipment);
 		}
 
-		public Dictionary<string, ReadInterval> getNextreadIntervalsByEquipment() {
+		public Dictionary<string, List<ReadInterval>> getNextReadIntervalsByEquipment() {
 			if (null != readIntervalsMgr) {
 				return readIntervalsMgr.getNextreadIntervalsByEquipment();
 			}
