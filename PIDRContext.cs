@@ -155,7 +155,12 @@ namespace PIDataReaderCommons
 				return ExitCodes.EXITCODE_CANNOTCREATEMAILER;
 			}
 
-			buildTopicsMap();
+			try { 
+				buildTopicsMap();
+			} catch(Exception) {
+				logger.Fatal("Cannot create collection that maps equipments to topics");
+				return ExitCodes.EXITCODE_INVALIDCONFIG;
+			}
 
 			if (null == readIntervalsMgr) {
 				logger.Fatal("Null reference to ReadIntervalsManager. Unable to setup read intervals. Program will abort.");
