@@ -322,14 +322,6 @@ namespace PIDataReaderCommons {
 				throughput = e.recordCount / e.elapsedTime;
 			}
 			logger.Info("Read complete. Time {0}s. Records: {1}. Thrput: {2} records/s. ", e.elapsedTime, e.recordCount, throughput.ToString("F2"));
-			/*
-			overallReadTime = 0;
-			foreach (string eqmName in e.readTimesByEquipment.Keys) {
-				logger.Info("Time required to read tags/batches for equipment/module {0}: {1}", eqmName, e.readTimesByEquipment[eqmName]);
-				overallReadTime += e.readTimesByEquipment[eqmName];
-			}
-			logger.Info("Total time required for reading {0} equipments/modules: {1}", e.readTimesByEquipment.Count, overallReadTime);
-			*/
 		}
 
 		private void MQTTWriter_PublishCompleted(MQTTPublishTerminatedEventArgs e) {
@@ -339,15 +331,6 @@ namespace PIDataReaderCommons {
 				throughput = e.byteCount / e.elapsedTime;
 			}
 			logger.Info("Publish complete. Time {0}s. Bytes: {1}. Thrput: {2} bytes/s. ", e.elapsedTime, e.byteCount, throughput.ToString("F2"));
-			/*
-			PIReaderConfig config = pidrContext.getConfig();
-			if (config.read.readExtent.type.ToLower().Equals(ReadExtent.READ_EXTENT_FREQUENCY)) {
-				double scheduleAsSec = config.read.readExtent.readExtentFrequency.getFrequencySecondsAsDouble();
-				if (totalReadAndPublishTimeSec > scheduleAsSec) {
-					logger.Warn("TIME REQUIRED FOR READING AND POSTING EXCEEDS SCHEDULE PERIOD: RISK OF LOSING DATA AND/OR OVERLOADING MQTT BROKER!");
-				}
-			}
-			*/
 		}
 
 		private void MqttWriter_MQTTWriter_ClientClosed(MQTTClientClosedEventArgs e) {

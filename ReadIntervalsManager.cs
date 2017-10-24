@@ -16,34 +16,6 @@ namespace PIDataReaderCommons {
 			return nextReadIntervalsByEquipment;
 		}
 
-		/*
-		private void sliceIntervals(UInt64 sliceIntervalSec) {
-			Dictionary<string, List<ReadInterval>> nextSlicedReadIntervalsByEquipment = new Dictionary<string, List<ReadInterval>>();
-			foreach (string eqmName in nextReadIntervalsByEquipment.Keys) {
-				List<ReadInterval> readIntervals = nextReadIntervalsByEquipment[eqmName];
-				if (readIntervals.Count > 0) {
-					throw new Exception("Error: at this stage we should have only 1 read interval per equipment!");
-				}
-				ReadInterval readInterval = readIntervals[0];
-				DateTime currentStartTime = readInterval.start;
-
-				List<ReadInterval> slicedReadIntervals = new List<ReadInterval>();
-
-				while (currentStartTime < readInterval.end) {
-					DateTime currentEndTime = currentStartTime.AddSeconds(sliceIntervalSec-1);
-					if (currentEndTime > readInterval.end) {
-						slicedReadIntervals.Add(new ReadInterval(currentStartTime, readInterval.end));
-					} else {
-						slicedReadIntervals.Add(new ReadInterval(currentStartTime, currentEndTime));
-					}
-					currentStartTime = currentEndTime.AddSeconds(1);
-				}
-				nextSlicedReadIntervalsByEquipment[eqmName] = slicedReadIntervals;
-			}
-
-			nextReadIntervalsByEquipment = nextSlicedReadIntervalsByEquipment;
-		}
-		*/
 		private List<ReadInterval> cutIntervalIntoSlices(UInt64 sliceDurationMilliSec, DateTime startTime, DateTime endTime, string dateFormat) {
 			List<ReadInterval> slicedReadIntervals = new List<ReadInterval>();
 			DateTime currentStartTime = startTime;
