@@ -254,7 +254,8 @@ namespace PIDataReaderCommons {
 			if (0 != totalPublishTime) {
 				throughput = totalByteCount / totalPublishTime;
 			}
-			logger.Info("====MQTT Publish. Total messages: {0}. Total bytes: {1}. Total time: {2}. Avg. thrput: {3} bytes/s", totalMessageCount, totalByteCount, totalReadTime, throughput.ToString("F2"));
+			logger.Info("====MQTT Publish. Total messages: {0}. Total bytes: {1}. Total time: {2}. Avg. thrput: {3} bytes/s", totalMessageCount, totalByteCount, totalPublishTime, throughput.ToString("F2"));
+			logger.Info("====Total time (read + publish): {0}", totalReadTime + totalPublishTime);
 
 			PIReaderConfig config = pidrContext.getConfig();
 			if (config.read.readExtent.type.ToLower().Equals(ReadExtent.READ_EXTENT_FREQUENCY)) {
