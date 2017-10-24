@@ -13,8 +13,7 @@ namespace PIDataReaderCommons {
 
 		private bool dumpReadsToLocalFiles;
 		private bool appendToLocalFiles;
-		private double overallReadTime;
-		
+				
 		private string mainAssemblyVersionInfo;
 		private string piDataReaderLibVersionInfo;
 
@@ -26,6 +25,9 @@ namespace PIDataReaderCommons {
 
 		private Timer timer;
 		private UInt32 timerPeriod;
+
+		private List<MQTTPublishTerminatedEventArgs> publishTerminatedEAList;
+		private List<PIReadTerminatedEventArgs> readTerminatedEAList;
 
 		public PIDRController(string mainAssemblyVersionInfo, bool isWindowsService) {
 			this.mainAssemblyVersionInfo = mainAssemblyVersionInfo;
@@ -186,44 +188,89 @@ namespace PIDataReaderCommons {
 		}
 
 		private void readAndWrite() {
-			Dictionary<string, PIData> piDataMap = null;
 			Dictionary<string, string> topicsMap = pidrContext.getTopicsMap();
 			PIReaderConfig config = pidrContext.getConfig();
+			publishTerminatedEAList = new List<MQTTPublishTerminatedEventArgs>();
+			readTerminatedEAList = new List<PIReadTerminatedEventArgs>();
 			try {
 				if (config.read.readMode.Equals(Read.READMODE_BATCH)) {
-					logger.Info("Reading batch information");
+					logger.Info("====Start reading/writing batch info");
 					//for each module and for each interval
 					foreach (BatchCfg batchCfg in config.read.batches) {
+						logger.Info("====Module '{0}'", batchCfg.moduleName);
 						List<ReadInterval> readIntervals = pidrContext.getNextReadIntervalsByEquipment()[batchCfg.moduleName];
-						foreach (ReadInterval readInterval in readIntervals) { 
-							piDataMap = reader.readBatches(batchCfg, readInterval);
-							writeReadFinishedToLog(piDataMap);
-							mqttWriter.write(piDataMap, topicsMap);
+						foreach (ReadInterval readInterval in readIntervals) {
+							logger.Info("======Time interval: [{0}, {1}]", readInterval.start.ToString(config.dateFormats.reference), readInterval.end.ToString(config.dateFormats.reference));
+							PIData piData = reader.readBatches(batchCfg, readInterval);
+							writeReadFinishedToLog(piData, batchCfg.moduleName);
+							mqttWriter.write(piData, batchCfg.moduleName, topicsMap);
 							if (dumpReadsToLocalFiles) {
-								fileWriter.writeBatches(piDataMap, appendToLocalFiles);
+								fileWriter.writeBatches(piData, batchCfg.moduleName, appendToLocalFiles);
 							}
 						}
 					}
 				} else {
-					logger.Info("Reading tag information");
+					logger.Info("====Start reading/writing tag info");
 					//for each equipment and for each interval
 					foreach (EquipmentCfg equipmentCfg in config.read.equipments) {
+						logger.Info("====Equipment '{0}'", equipmentCfg.name);
 						List<ReadInterval> readIntervals = pidrContext.getNextReadIntervalsByEquipment()[equipmentCfg.name];
 						foreach (ReadInterval readInterval in readIntervals) {
-							piDataMap = reader.readTags(equipmentCfg, readInterval);
-							if (piDataMap.Count > 0) {
-								writeReadFinishedToLog(piDataMap);
-								mqttWriter.write(piDataMap, topicsMap);
+							logger.Info("======Time interval: [{0}, {1}]", readInterval.start.ToString(config.dateFormats.reference), readInterval.end.ToString(config.dateFormats.reference));
+							PIData piData = reader.readTags(equipmentCfg, readInterval);
+							if (null != piData) {
+								writeReadFinishedToLog(piData, equipmentCfg.name);
+								mqttWriter.write(piData, equipmentCfg.name, topicsMap);
 								if (dumpReadsToLocalFiles) {
-									fileWriter.writeTags(piDataMap, appendToLocalFiles);
+									fileWriter.writeTags(piData, equipmentCfg.name, appendToLocalFiles);
 								}
 							}
 						}
 					}
 				}
+				readAndWriteCompleted();
 			} catch (Exception ex) {
 				logger.Fatal("Exception encountered while reading data or publishing data or writing data to file. Details {0}.", ex.ToString());
 			} finally { }
+		}
+
+		private void readAndWriteCompleted() {
+			ulong totalRecordCount = 0, totalMessageCount = 0, totalByteCount = 0;
+			double totalReadTime = 0, totalPublishTime = 0;
+
+			foreach(PIReadTerminatedEventArgs ea in readTerminatedEAList) {
+				totalRecordCount += ea.recordCount;
+				totalReadTime += ea.elapsedTime;
+			}
+			foreach(MQTTPublishTerminatedEventArgs ea in publishTerminatedEAList) {
+				totalMessageCount += ea.messageCount;
+				totalByteCount += ea.byteCount;
+				totalPublishTime += ea.elapsedTime;
+			}
+
+			logger.Info("====End reading/writing. Summary of performances");
+			logger.Info("====Read from PI. Total records: {0}. Total time: {1}", totalRecordCount, totalReadTime);
+			double throughput = 0;
+			if (0 != totalPublishTime) {
+				throughput = totalByteCount / totalPublishTime;
+			}
+			logger.Info("====MQTT Publish. Total messages: {0}. Total bytes: {1}. Total time: {2}. Avg. thrput: {3} bytes/s", totalMessageCount, totalByteCount, totalReadTime, throughput.ToString("F2"));
+
+			PIReaderConfig config = pidrContext.getConfig();
+			if (config.read.readExtent.type.ToLower().Equals(ReadExtent.READ_EXTENT_FREQUENCY)) {
+				double scheduleAsSec = config.read.readExtent.readExtentFrequency.getFrequencySecondsAsDouble();
+				if ((totalPublishTime + totalReadTime) > scheduleAsSec) {
+					logger.Warn("TIME REQUIRED FOR READING AND POSTING EXCEEDS SCHEDULE PERIOD: CONSIDER SCHEDULING AT A LOWER FREQUENCY!");
+				}
+			}
+		}
+
+		private void writeReadFinishedToLog(PIData piData, string equipmentName) {
+			try {
+				logger.Info("{0}{1}{2},{3}", Utils.READEND_MARKER, Utils.READEND_SEPARATOR, equipmentName, piData.readFinished);
+			} catch (Exception e) {
+				logger.Error(e.ToString());
+			}
 		}
 
 		private void writeReadFinishedToLog(Dictionary<string, PIData> piDataMap) {
@@ -269,20 +316,30 @@ namespace PIDataReaderCommons {
 		}
 
 		private void Reader_PIReadTerminated(PIReadTerminatedEventArgs e) {
+			readTerminatedEAList.Add(e);
+			double throughput = 0;
+			if (0 != e.elapsedTime) {
+				throughput = e.recordCount / e.elapsedTime;
+			}
+			logger.Info("Read complete. Time {0}s. Records: {1}. Thrput: {2} records/s. ", e.elapsedTime, e.recordCount, throughput.ToString("F2"));
+			/*
 			overallReadTime = 0;
 			foreach (string eqmName in e.readTimesByEquipment.Keys) {
 				logger.Info("Time required to read tags/batches for equipment/module {0}: {1}", eqmName, e.readTimesByEquipment[eqmName]);
 				overallReadTime += e.readTimesByEquipment[eqmName];
 			}
 			logger.Info("Total time required for reading {0} equipments/modules: {1}", e.readTimesByEquipment.Count, overallReadTime);
+			*/
 		}
 
 		private void MQTTWriter_PublishCompleted(MQTTPublishTerminatedEventArgs e) {
-			double totalReadAndPublishTimeSec = e.elapsedTimeSec + overallReadTime;
-
-			logger.Info("Total time required for publish: {0}s", e.elapsedTimeSec.ToString());
-			logger.Info("Total time required for reading and publishing: {0}s", totalReadAndPublishTimeSec);
-			logger.Info("Network throughput in this run was: {0} bytes/s", e.throughput.ToString("F2"));
+			publishTerminatedEAList.Add(e);
+			double throughput = 0;
+			if (0 != e.elapsedTime) {
+				throughput = e.byteCount / e.elapsedTime;
+			}
+			logger.Info("Publish complete. Time {0}s. Bytes: {1}. Thrput: {2} bytes/s. ", e.elapsedTime, e.byteCount, throughput.ToString("F2"));
+			/*
 			PIReaderConfig config = pidrContext.getConfig();
 			if (config.read.readExtent.type.ToLower().Equals(ReadExtent.READ_EXTENT_FREQUENCY)) {
 				double scheduleAsSec = config.read.readExtent.readExtentFrequency.getFrequencySecondsAsDouble();
@@ -290,6 +347,7 @@ namespace PIDataReaderCommons {
 					logger.Warn("TIME REQUIRED FOR READING AND POSTING EXCEEDS SCHEDULE PERIOD: RISK OF LOSING DATA AND/OR OVERLOADING MQTT BROKER!");
 				}
 			}
+			*/
 		}
 
 		private void MqttWriter_MQTTWriter_ClientClosed(MQTTClientClosedEventArgs e) {
