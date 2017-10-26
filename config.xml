@@ -32,8 +32,8 @@
 		</connection>
 	</connections>
 	<read mode="tag"> <!-- mode="tag|batch" -->
-		<readextent type="frequency" slice="1" sliceunit="h"> <!-- readextent type can be frequency, fixed, relative -->
-			<frequency value="100" unit="s" buffer="0"/> <!-- reads 100 time units back from now, repeat every 100 time units; unit can be s(econds), h(ours), d(ays); buffer is used to enlarge the read window by a percentage (by shifting the starting time)-->
+		<readextent type="frequency" slice="1" unit="h"> <!-- readextent type can be frequency, fixed, relative; slice can be any integer number; unit can be s(econds), h(ours), d(ays) -->
+			<frequency value="100" unit="s" buffer="0" limit="100"/> <!-- reads 100 time units back from now, repeat every 100 time units; unit can be s(econds), h(ours), d(ays); buffer is used to enlarge the read window by a percentage (by shifting the starting time); limit limits the amount of time that data can be read back when the software restarts after a period of stop.-->
 			<!--fixed startdate="2017-02-01T12-00-00" enddate="2017-02-01T14-00-00"/--> <!-- read a fixed date range -->
 			<!--relative readpast="12" unit="h"/--> <!-- read the past 12 time units from now, unit is set to h(ours) -->
 		</readextent>
