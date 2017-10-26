@@ -81,18 +81,18 @@
 									</xs:sequence>
 									<xs:attribute name="type" type="xs:string" use="required" />
 									<xs:attribute name="slice" type="xs:string" use="required" />
-									<xs:attribute name="sliceunit" type="xs:string" use="required" />
+									<xs:attribute name="unit" type="xs:string" use="required" />
 								</xs:complexType>
 							</xs:element>
 							<xs:choice>
 								<xs:element name="equipments">
 									<xs:complexType>
 										<xs:sequence>
-											<xs:element name="equipment">
+											<xs:element maxOccurs="unbounded" name="equipment">
 													<xs:complexType>
 														<xs:sequence>
 															<xs:element name="taglist" type="xs:string" />
-															<xs:element name="phaselist" type="xs:string" />
+															<xs:element name="phaselist" type="xs:string" minOccurs="0" />
 														</xs:sequence>
 														<xs:attribute name="name" type="xs:string" use="required" />
 														<xs:attribute name="mqtttopic" type="xs:string" use="required" />
