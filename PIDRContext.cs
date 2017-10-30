@@ -202,10 +202,11 @@ namespace PIDataReaderCommons
 
 		private bool createConfiguration() {
 			try {
+				PIReaderConfig.xmlValidate(configFileFullPath);
 				config = PIReaderConfig.parseFromFile(configFileFullPath);
 			} catch (Exception ex) {
-				logger.Fatal("Unable to parse configuration file from {0}. Please check that the file exists and is well formed.", configFileFullPath);
-				logger.Fatal("Details: {0}", ex.ToString());
+				logger.Fatal("Unable to parse or validate configuration file from {0}. Please check that:\n1. the file exists and is well formed;\n2. xmlns=\"http://www.lilly.com/PIDR\" is specified in the root element;\n3. XML schema file is referenced correctly.\n", configFileFullPath);
+				logger.Fatal("Details: {0}", ex.Message);
 				return false;
 			}
 			return true;
