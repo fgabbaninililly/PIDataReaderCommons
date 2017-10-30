@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <config test="false"
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-				xsi:schemaLocation="http://www.w3schools.com file:///D:\Projects\DOTNET\PIDataReaderApps\PIDataReaderCommons\config.xsd">
+				xmlns="http://www.lilly.com/PIDR"
+				xsi:schemaLocation="http://www.lilly.com/PIDR file:///C:\Program%20Files\Eli%20Lilly\PIDataReaderApps\config.xsd">
 	<dateformats pi="dd/MM/yyyy HH:mm:ss" reference="yyyy-MM-ddTHH-mm-ss" hadoop="yyyy-MM-dd HH:mm:ss"/>
 	<maildata enabled="true">
 		<smtphost></smtphost>
