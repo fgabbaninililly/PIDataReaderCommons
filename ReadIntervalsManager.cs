@@ -46,7 +46,6 @@ namespace PIDataReaderCommons {
 			nextReadIntervalsByEquipment = new Dictionary<string, List<ReadInterval>>();
 
 			#region correct approach to build read intervals
-			/*
 			//setup a List<ReadInterval> and initialize it to a list containing 1 ReadInterval: [startTimeFromConfig, endTimeFromConfig]
 			List<ReadInterval> readIntervals = new List<ReadInterval>();
 			readIntervals.Add(new ReadInterval(startTimeFromConfig, endTimeFromConfig));
@@ -81,7 +80,6 @@ namespace PIDataReaderCommons {
 					nextReadIntervalsByEquipment.Add(eq.name, eqmReadIntervals);
 				}
 			}
-			*/
 			#endregion
 
 			#region alternate approach to build read intervals
@@ -116,7 +114,7 @@ namespace PIDataReaderCommons {
 			#endregion
 
 			#region wrong approach to build read intervals
-			
+			/*
 			//ERROR: uses same List<ReadIntervals> for every equipment
 			//when a reader is run with a fixed/relative time interval, slice the time interval into 
 			//pieces to avoid large reads on PI
@@ -138,7 +136,7 @@ namespace PIDataReaderCommons {
 					nextReadIntervalsByEquipment.Add(eq.name, readIntervals);
 				}
 			}
-			
+			*/
 			#endregion
 
 			//when a reader is scheduled, if read times read from log are "before" 
