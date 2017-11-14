@@ -127,13 +127,19 @@ namespace PIDataReaderCommons
 			string clientName = "." + Utils.md5Calc(machineName + configFileFullPath);
 			string brokerAddress = mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTBROKERADDRESS);
 			string brokerPort = mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTBROKERPORT);
+			ushort keepAliveSec = Connection.DEFAULT_MQTT_KEEPALIVE_SEC;
+			try {
+				keepAliveSec = ushort.Parse(mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTKEEPALIVESEC));
+			} catch (Exception) {
+				logger.Warn("Unable to parse valid keep alive value. Reverting to default value of {1}s.", mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTKEEPALIVESEC), keepAliveSec);
+			}
 			try {
 				clientName = mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTCLIENTNAME) + clientName;
 				if(null != mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTCLIENTTYPE) &&
 					mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTCLIENTTYPE).Equals(Parameter.PARAM_VALUE_MQTTCLIENTTYPE_MQTTNET)) {
-					mqttWriter = MQTTWriterFactory.createMQTTNet(brokerAddress, brokerPort, clientName);
+					mqttWriter = MQTTWriterFactory.createMQTTNet(brokerAddress, brokerPort, clientName, keepAliveSec);
 				} else {
-					mqttWriter = MQTTWriterFactory.createM2MQTT(brokerAddress, brokerPort, clientName);
+					mqttWriter = MQTTWriterFactory.createM2MQTT(brokerAddress, brokerPort, clientName, keepAliveSec);
 				}
 			} catch (Exception) {
 				logger.Fatal("Unable to create MQTT writer. Program will abort.");
