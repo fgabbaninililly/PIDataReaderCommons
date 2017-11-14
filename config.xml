@@ -22,6 +22,7 @@
 				<parameter name="mqttbrokeraddress">[address to MQTT broker]</parameter>
 				<parameter name="mqttbrokerport">1883</parameter>
 				<parameter name="mqttclientname">Sample reader 01</parameter>
+				<parameter name="mqttkeepalivesec">240</parameter> <!-- keep connection to broker alive by sending PINGREQ messages every x seconds -->
 			</parameters>
 		</connection>
 		<connection name="pi">
