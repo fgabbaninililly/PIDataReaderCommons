@@ -81,64 +81,7 @@ namespace PIDataReaderCommons {
 				}
 			}
 			#endregion
-
-			#region alternate approach to build read intervals
-			/* alternate approach to build read intervals:
-			//assign to each equipment/module a list of next read intervals that contains ONLY 1 read interval: [startTimeFromConfig, endTimeFromConfig]
-			if (config.read.readBatches()) {
-				foreach (BatchCfg batchCfg in config.read.batches) {
-					List<ReadInterval> readIntervals = new List<ReadInterval>();
-					readIntervals.Add(new ReadInterval(startTimeFromConfig, endTimeFromConfig));
-					nextReadIntervalsByEquipment.Add(batchCfg.moduleName, readIntervals);
-				}
-			} else {
-				foreach (EquipmentCfg eq in config.read.equipments) {
-					List<ReadInterval> readIntervals = new List<ReadInterval>();
-					readIntervals.Add(new ReadInterval(startTimeFromConfig, endTimeFromConfig));
-					nextReadIntervalsByEquipment.Add(eq.name, readIntervals);
-				}
-			}
-
-			//if slicing is needed, for each equipment/module, cut the interval that is contained in the list of next read intervals into slices
-			if (config.read.readExtent.type.ToLower().Equals(ReadExtent.READ_EXTENT_FIXED) ||
-				config.read.readExtent.type.ToLower().Equals(ReadExtent.READ_EXTENT_RELATIVE)) {
-
-				if (config.read.readExtent.isSliced()) {
-					foreach(string eqm in nextReadIntervalsByEquipment.Keys) {
-						List<ReadInterval> slicedIntervals = cutIntervalIntoSlices(config.read.readExtent.getSliceDurationMillisecSec(), startTimeFromConfig, endTimeFromConfig, config.dateFormats.reference);
-						nextReadIntervalsByEquipment[eqm] = slicedIntervals;
-					}
-				}
-			}
-			*/
-			#endregion
-
-			#region wrong approach to build read intervals
-			/*
-			//ERROR: uses same List<ReadIntervals> for every equipment
-			//when a reader is run with a fixed/relative time interval, slice the time interval into 
-			//pieces to avoid large reads on PI
-			List<ReadInterval> readIntervals = new List<ReadInterval>();
-			readIntervals.Add(new ReadInterval(startTimeFromConfig, endTimeFromConfig));
-			if (config.read.readExtent.type.ToLower().Equals(ReadExtent.READ_EXTENT_FIXED) ||
-				config.read.readExtent.type.ToLower().Equals(ReadExtent.READ_EXTENT_RELATIVE)) {
-				if (config.read.readExtent.isSliced()) {
-					readIntervals = cutIntervalIntoSlices(config.read.readExtent.getSliceDurationMillisecSec(), startTimeFromConfig, endTimeFromConfig, config.dateFormats.reference);
-				}
-			}
-
-			if (config.read.readBatches()) {
-				foreach (BatchCfg batchCfg in config.read.batches) {
-					nextReadIntervalsByEquipment.Add(batchCfg.moduleName, readIntervals);
-				}
-			} else {
-				foreach (EquipmentCfg eq in config.read.equipments) {
-					nextReadIntervalsByEquipment.Add(eq.name, readIntervals);
-				}
-			}
-			*/
-			#endregion
-
+			
 			//when a reader is scheduled, if read times read from log are "before" 
 			//those specified in the config, use read times from log
 			if (config.read.readExtent.type.ToLower().Equals(ReadExtent.READ_EXTENT_FREQUENCY)) {
