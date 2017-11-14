@@ -45,6 +45,79 @@ namespace PIDataReaderCommons {
 			logger.Info("Read interval (from configuration file parameters) is: [{0}, {1}]", startTimeFromConfig.ToString(config.dateFormats.reference), endTimeFromConfig.ToString(config.dateFormats.reference));
 			nextReadIntervalsByEquipment = new Dictionary<string, List<ReadInterval>>();
 
+			#region correct approach to build read intervals
+			/*
+			//setup a List<ReadInterval> and initialize it to a list containing 1 ReadInterval: [startTimeFromConfig, endTimeFromConfig]
+			List<ReadInterval> readIntervals = new List<ReadInterval>();
+			readIntervals.Add(new ReadInterval(startTimeFromConfig, endTimeFromConfig));
+
+			//when a reader is run with a fixed/relative time interval, slice the time interval into 
+			//pieces to avoid large reads on PI: List<ReadInterval> now contains potentially more than 1 ReadIntervals
+			if (config.read.readExtent.type.ToLower().Equals(ReadExtent.READ_EXTENT_FIXED) ||
+				config.read.readExtent.type.ToLower().Equals(ReadExtent.READ_EXTENT_RELATIVE)) {
+				if (config.read.readExtent.isSliced()) {
+					readIntervals = cutIntervalIntoSlices(config.read.readExtent.getSliceDurationMillisecSec(), startTimeFromConfig, endTimeFromConfig, config.dateFormats.reference);
+				}
+			}
+
+			if (config.read.readBatches()) {
+				foreach (BatchCfg batchCfg in config.read.batches) {
+					//in Dictionary<string, List<ReadInterval>>, each equipment should have its own list of ReadIntervals.
+					//ReadIntervals are copied from readIntervals into a new collection
+					List<ReadInterval> eqmReadIntervals = new List<ReadInterval>();
+					foreach (ReadInterval ri in readIntervals) {
+						eqmReadIntervals.Add(new ReadInterval(ri.start, ri.end));
+					}
+					nextReadIntervalsByEquipment.Add(batchCfg.moduleName, eqmReadIntervals);
+				}
+			} else {
+				foreach (EquipmentCfg eq in config.read.equipments) {
+					//in Dictionary<string, List<ReadInterval>>, each equipment should have its own list of ReadIntervals.
+					//ReadIntervals are copied from readIntervals into a new collection
+					List<ReadInterval> eqmReadIntervals = new List<ReadInterval>();
+					foreach(ReadInterval ri in readIntervals) { 
+						eqmReadIntervals.Add(new ReadInterval(ri.start, ri.end));
+					}
+					nextReadIntervalsByEquipment.Add(eq.name, eqmReadIntervals);
+				}
+			}
+			*/
+			#endregion
+
+			#region alternate approach to build read intervals
+			/* alternate approach to build read intervals:
+			//assign to each equipment/module a list of next read intervals that contains ONLY 1 read interval: [startTimeFromConfig, endTimeFromConfig]
+			if (config.read.readBatches()) {
+				foreach (BatchCfg batchCfg in config.read.batches) {
+					List<ReadInterval> readIntervals = new List<ReadInterval>();
+					readIntervals.Add(new ReadInterval(startTimeFromConfig, endTimeFromConfig));
+					nextReadIntervalsByEquipment.Add(batchCfg.moduleName, readIntervals);
+				}
+			} else {
+				foreach (EquipmentCfg eq in config.read.equipments) {
+					List<ReadInterval> readIntervals = new List<ReadInterval>();
+					readIntervals.Add(new ReadInterval(startTimeFromConfig, endTimeFromConfig));
+					nextReadIntervalsByEquipment.Add(eq.name, readIntervals);
+				}
+			}
+
+			//if slicing is needed, for each equipment/module, cut the interval that is contained in the list of next read intervals into slices
+			if (config.read.readExtent.type.ToLower().Equals(ReadExtent.READ_EXTENT_FIXED) ||
+				config.read.readExtent.type.ToLower().Equals(ReadExtent.READ_EXTENT_RELATIVE)) {
+
+				if (config.read.readExtent.isSliced()) {
+					foreach(string eqm in nextReadIntervalsByEquipment.Keys) {
+						List<ReadInterval> slicedIntervals = cutIntervalIntoSlices(config.read.readExtent.getSliceDurationMillisecSec(), startTimeFromConfig, endTimeFromConfig, config.dateFormats.reference);
+						nextReadIntervalsByEquipment[eqm] = slicedIntervals;
+					}
+				}
+			}
+			*/
+			#endregion
+
+			#region wrong approach to build read intervals
+			
+			//ERROR: uses same List<ReadIntervals> for every equipment
 			//when a reader is run with a fixed/relative time interval, slice the time interval into 
 			//pieces to avoid large reads on PI
 			List<ReadInterval> readIntervals = new List<ReadInterval>();
@@ -65,6 +138,8 @@ namespace PIDataReaderCommons {
 					nextReadIntervalsByEquipment.Add(eq.name, readIntervals);
 				}
 			}
+			
+			#endregion
 
 			//when a reader is scheduled, if read times read from log are "before" 
 			//those specified in the config, use read times from log
@@ -109,12 +184,20 @@ namespace PIDataReaderCommons {
 				ReadInterval ri = nextReadIntervalsByEquipment[eqmName][0];
 				
 				if (ri.end < startTimeFromConfig) {
-					logger.Info("End time of previous interval is before start of next interval. Risk of losing data. Adjusted next read interval.");
-				} else {
-					logger.Trace("Start time of next interval is before end of previous interval. Adjusted next read interval.");
+					logger.Info("{0}: end time of previous interval is before start of next interval. Risk of losing data. Adjusted next read interval.", eqmName);
+				}
+				
+				else {
+					logger.Trace("{0}: start time of next interval is before end of previous interval. Adjusted next read interval.", eqmName);
 				}
 				ri.start = ri.end;
 				ri.end = endTimeFromConfig;
+
+				if (ri.start >= ri.end) {
+					string msg = String.Format("Invalid read interval detected. Equipment: {0}. Interval: [{1}, {2}]", eqmName, ri.start, ri.end);
+					logger.Error(msg);
+					throw new Exception(msg);
+				}
 			}
 		}
 
