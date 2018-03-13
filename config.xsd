@@ -13,6 +13,13 @@
 						<xs:attribute name="hadoop" type="xs:string" use="required" />
 					</xs:complexType>
 				</xs:element>
+				<xs:element name="separators">
+					<xs:complexType>
+						<xs:attribute name="timestamp" type="xs:string" use="required" />
+						<xs:attribute name="field" type="xs:string" use="required" />
+						<xs:attribute name="value" type="xs:string" use="required" />
+					</xs:complexType>
+				</xs:element>
 				<xs:element name="maildata">
 					<xs:complexType>
 					<xs:sequence>
