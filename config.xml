@@ -4,6 +4,8 @@
 				xmlns="http://www.lilly.com/PIDR"
 				xsi:schemaLocation="http://www.lilly.com/PIDR file:///C:\Program%20Files\Eli%20Lilly\PIDataReaderApps\config.xsd">
 	<dateformats pi="dd/MM/yyyy HH:mm:ss" reference="yyyy-MM-ddTHH-mm-ss" hadoop="yyyy-MM-dd HH:mm:ss"/>
+	<!-- DO NOT USE XML SPECIAL CHARACTERS AS SEPARATORS: &lt; (<), &amp; (&), &gt; (>), &quot; ("), and &apos; (') -->
+	<separators timestamp=":" field="|" value=","/>
 	<maildata enabled="true">
 		<smtphost></smtphost>
 		<from></from>

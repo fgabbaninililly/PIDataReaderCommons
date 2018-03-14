@@ -116,7 +116,10 @@ namespace PIDataReaderCommons
 					connection.getParameterValueByName(Parameter.PARAMNAME_PISDKTYPE),
 					config.read.readBatches(),
 					config.dateFormats.reference,
-					config.dateFormats.pi);
+					config.dateFormats.pi,
+					config.separators.timestampSeparator,
+					config.separators.fieldSeparator,
+					config.separators.valueSeparator);
 				reader.init();
 			} catch (Exception) {
 				logger.Fatal("Unable to create reader. Program will abort.");
