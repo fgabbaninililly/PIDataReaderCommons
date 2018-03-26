@@ -126,9 +126,7 @@ namespace PIDataReaderCommons {
 				
 				if (ri.end < startTimeFromConfig) {
 					logger.Info("{0}: end time of previous interval is before start of next interval. Risk of losing data. Adjusted next read interval.", eqmName);
-				}
-				
-				else {
+				} else {
 					logger.Trace("{0}: start time of next interval is before end of previous interval. Adjusted next read interval.", eqmName);
 				}
 				ri.start = ri.end;
