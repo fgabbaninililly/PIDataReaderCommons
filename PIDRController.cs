@@ -91,7 +91,11 @@ namespace PIDataReaderCommons {
 			}
 			return res;
 		}
-		
+
+		public bool isScheduled() {
+			return pidrContext.getIsReadExtentFrequency();
+		}
+
 		public int start(string[] args) {
 			
 			int res = parseCommandLine(args);
