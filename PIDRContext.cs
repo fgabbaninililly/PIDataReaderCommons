@@ -151,7 +151,7 @@ namespace PIDataReaderCommons
 
 			if (dumpReadsToLocalFiles) {
 				string currentWorkingFolder = System.IO.Path.GetDirectoryName(configFileFullPath);
-				fileWriter = new FileWriter(currentWorkingFolder, config.dateFormats.reference, config.dateFormats.hadoop);
+				fileWriter = new FileWriter(currentWorkingFolder, config.dateFormats.reference, config.dateFormats.hadoop, config.separators.timestampSeparator[0], config.separators.valueSeparator[0], config.separators.fieldSeparator[0]);
 			}
 
 			try {
