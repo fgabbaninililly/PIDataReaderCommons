@@ -7,6 +7,10 @@ using System.IO;
 using System.Threading;
 
 namespace PIDataReaderCommons {
+	enum LastReadStatusEnum {
+		success, connection_error
+	};
+
 	public class PIDRController {
 		private static Logger logger = LogManager.GetCurrentClassLogger();
 		private static string currentWorkingFolder;
@@ -28,6 +32,8 @@ namespace PIDataReaderCommons {
 
 		private List<MQTTPublishTerminatedEventArgs> publishTerminatedEAList;
 		private List<PIReadTerminatedEventArgs> readTerminatedEAList;
+
+		private LastReadStatusEnum lastReadStatus;
 
 		public PIDRController(string mainAssemblyVersionInfo, bool isWindowsService) {
 			this.mainAssemblyVersionInfo = mainAssemblyVersionInfo;
@@ -122,18 +128,23 @@ namespace PIDataReaderCommons {
 				reader.dummyRead();
 			}
 
-			mqttWriter = pidrContext.getMqttWriter();
-			mqttWriter.initAndConnect();
+			//edit nuovo sdg
+			if (pidrContext.isMqttEnabled()) {
+				mqttWriter = pidrContext.getMqttWriter();
+				mqttWriter.initAndConnect();
 
-			if (!mqttWriter.isConnected()) {
-				return ExitCodes.EXITCODE_CANNOTCONNECTTOBROKER;
-			}
+				if (!mqttWriter.isConnected()) {
+					return ExitCodes.EXITCODE_CANNOTCONNECTTOBROKER;
+				}
 
-			mqttWriter.MQTTWriter_PublishCompleted += MQTTWriter_PublishCompleted;
-			mqttWriter.MQTTWriter_ClientClosed += MqttWriter_MQTTWriter_ClientClosed;
+				mqttWriter.MQTTWriter_PublishCompleted += MQTTWriter_PublishCompleted;
+				mqttWriter.MQTTWriter_ClientClosed += MqttWriter_MQTTWriter_ClientClosed;
 
-			logger.Info("MQTT data writer was successfully created");
-			logger.Info("MQTT client ID is {0}", mqttWriter.getClientName());
+				logger.Info("MQTT data writer was successfully created");
+				logger.Info("MQTT client ID is {0}", mqttWriter.getClientName());
+			} else{ //else if nuovo sdg
+				logger.Info("MQTT data writer was NOT created due to the value of mqttEnabled parameter inside xml config file");
+			}//fine if nuovo sdg
 
 			fileWriter = pidrContext.getFileWriter();
 
@@ -206,10 +217,19 @@ namespace PIDataReaderCommons {
 						foreach (ReadInterval readInterval in readIntervals) {
 							logger.Info("======Time interval: [{0}, {1}]", readInterval.start.ToString(config.dateFormats.reference), readInterval.end.ToString(config.dateFormats.reference));
 							PIData piData = reader.readBatches(batchCfg, readInterval);
-							writeReadFinishedToLog(piData, batchCfg.moduleName);
-							mqttWriter.write(piData, batchCfg.moduleName, topicsMap);
-							if (dumpReadsToLocalFiles) {
-								fileWriter.writeBatches(piData, batchCfg.moduleName, appendToLocalFiles);
+							if (null != piData) {
+								writeReadFinishedToLog(piData, batchCfg.moduleName);
+								//if nuovo sdg
+								if (pidrContext.isMqttEnabled()) {
+									mqttWriter.write(piData, batchCfg.moduleName, topicsMap);
+								}
+								//fine if nuovo sdg
+								if (dumpReadsToLocalFiles) {
+									fileWriter.writeBatches(piData, batchCfg.moduleName, appendToLocalFiles);
+								}
+								readInterval.lastReadWithSuccess = true;
+							} else {
+								readInterval.lastReadWithSuccess = false;
 							}
 						}
 					}
@@ -224,10 +244,17 @@ namespace PIDataReaderCommons {
 							PIData piData = reader.readTags(equipmentCfg, readInterval);
 							if (null != piData) {
 								writeReadFinishedToLog(piData, equipmentCfg.name);
-								mqttWriter.write(piData, equipmentCfg.name, topicsMap);
+								//if nuovo sdg
+								if (pidrContext.isMqttEnabled()) {
+									mqttWriter.write(piData, equipmentCfg.name, topicsMap);
+								}
+								//fine if nuovo sdg
 								if (dumpReadsToLocalFiles) {
 									fileWriter.writeTags(piData, equipmentCfg.name, appendToLocalFiles);
 								}
+								readInterval.lastReadWithSuccess = true;
+							} else {
+								readInterval.lastReadWithSuccess = false;
 							}
 						}
 					}
