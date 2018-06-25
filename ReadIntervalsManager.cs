@@ -124,6 +124,25 @@ namespace PIDataReaderCommons {
 				//schedule based on frequency: no slicing means that we can have only one read interval per equipment
 				ReadInterval ri = nextReadIntervalsByEquipment[eqmName][0];
 				
+				if (ri.lastReadWithSuccess) {
+					if (ri.end < startTimeFromConfig) {
+						logger.Info("{0}: end time of previous interval is before start of next interval. Risk of losing data. Adjusted next read interval.", eqmName);
+					} else {
+						logger.Trace("{0}: start time of next interval is before end of previous interval. Adjusted next read interval.", eqmName);
+					}
+					ri.start = ri.end;
+					ri.end = endTimeFromConfig;
+				} else {
+					ri.end = endTimeFromConfig;
+				}
+
+				if (ri.start >= ri.end) {
+					string msg = String.Format("Invalid read interval detected. Equipment: {0}. Interval: [{1}, {2}]", eqmName, ri.start, ri.end);
+					logger.Error(msg);
+					throw new Exception(msg);
+				}
+
+				/*
 				if (ri.end < startTimeFromConfig) {
 					logger.Info("{0}: end time of previous interval is before start of next interval. Risk of losing data. Adjusted next read interval.", eqmName);
 				} else {
@@ -137,6 +156,7 @@ namespace PIDataReaderCommons {
 					logger.Error(msg);
 					throw new Exception(msg);
 				}
+				*/
 			}
 		}
 
