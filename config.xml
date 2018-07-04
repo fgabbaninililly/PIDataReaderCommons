@@ -20,6 +20,7 @@
 	<connections>
 		<connection name="mqtt">
 			<parameters>
+				<parameter name="mqttenabled">true</parameter><!-- can be true or false; if parameter is not specified, MQTT is ENABLED by default -->
 				<parameter name="mqttclienttype">[client type]</parameter><!-- can be MQTTnet or M2Mqtt -->
 				<parameter name="mqttbrokeraddress">[address to MQTT broker]</parameter>
 				<parameter name="mqttbrokerport">1883</parameter>

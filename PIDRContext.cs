@@ -24,6 +24,7 @@ namespace PIDataReaderCommons
 		private Mailer mailer;
 		private bool executeDummyReadFirst;
 		private bool isWindowsService;
+		private bool isMQTTEnabled = true;
 
 		public PIDRContext(bool isWindowsService) {
 			this.isWindowsService = isWindowsService;
@@ -39,6 +40,10 @@ namespace PIDataReaderCommons
 
 		public bool getIsReadExtentFrequency() {
 			return ReadExtent.READ_EXTENT_FREQUENCY.Equals(config.read.readExtent.type.ToLower());
+		}
+
+		public bool isMqttEnabled() {
+			return isMQTTEnabled;
 		}
 
 		public void setConfigfileFullPath(string configFileFullPath) {
@@ -127,26 +132,29 @@ namespace PIDataReaderCommons
 			}
 
 			Connection mqttConnection = config.getConnectionByName("mqtt");
+			isMQTTEnabled = mqttConnection.isEnabled();
 			string clientName = "." + Utils.md5Calc(machineName + configFileFullPath);
-			string brokerAddress = mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTBROKERADDRESS);
-			string brokerPort = mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTBROKERPORT);
-			ushort keepAliveSec = Connection.DEFAULT_MQTT_KEEPALIVE_SEC;
-			try {
-				keepAliveSec = ushort.Parse(mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTKEEPALIVESEC));
-			} catch (Exception) {
-				logger.Warn("Unable to parse valid keep alive value. Reverting to default value of {1}s.", mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTKEEPALIVESEC), keepAliveSec);
-			}
-			try {
-				clientName = mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTCLIENTNAME) + clientName;
-				if(null != mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTCLIENTTYPE) &&
-					mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTCLIENTTYPE).Equals(Parameter.PARAM_VALUE_MQTTCLIENTTYPE_MQTTNET)) {
-					mqttWriter = MQTTWriterFactory.createMQTTNet(brokerAddress, brokerPort, clientName, keepAliveSec);
-				} else {
-					mqttWriter = MQTTWriterFactory.createM2MQTT(brokerAddress, brokerPort, clientName, keepAliveSec);
+			if (isMQTTEnabled) { 
+				string brokerAddress = mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTBROKERADDRESS);
+				string brokerPort = mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTBROKERPORT);
+				ushort keepAliveSec = Connection.DEFAULT_MQTT_KEEPALIVE_SEC;
+				try {
+					keepAliveSec = ushort.Parse(mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTKEEPALIVESEC));
+				} catch (Exception) {
+					logger.Warn("Unable to parse valid keep alive value. Reverting to default value of {1}s.", mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTKEEPALIVESEC), keepAliveSec);
 				}
-			} catch (Exception) {
-				logger.Fatal("Unable to create MQTT writer. Program will abort.");
-				return ExitCodes.EXITCODE_CANNOTCREATEWRITER;
+				try {
+					clientName = mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTCLIENTNAME) + clientName;
+					if(null != mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTCLIENTTYPE) &&
+						mqttConnection.getParameterValueByName(Parameter.PARAMNAME_MQTTCLIENTTYPE).Equals(Parameter.PARAM_VALUE_MQTTCLIENTTYPE_MQTTNET)) {
+						mqttWriter = MQTTWriterFactory.createMQTTNet(brokerAddress, brokerPort, clientName, keepAliveSec);
+					} else {
+						mqttWriter = MQTTWriterFactory.createM2MQTT(brokerAddress, brokerPort, clientName, keepAliveSec);
+					}
+				} catch (Exception) {
+					logger.Fatal("Unable to create MQTT writer. Program will abort.");
+					return ExitCodes.EXITCODE_CANNOTCREATEWRITER;
+				}
 			}
 
 			if (dumpReadsToLocalFiles) {
