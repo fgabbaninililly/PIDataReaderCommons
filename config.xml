@@ -5,7 +5,20 @@
 				xsi:schemaLocation="http://www.lilly.com/PIDR file:///C:\Program%20Files\Eli%20Lilly\PIDataReaderApps\config.xsd">
 	<dateformats pi="dd/MM/yyyy HH:mm:ss" reference="yyyy-MM-ddTHH-mm-ss" hadoop="yyyy-MM-dd HH:mm:ss"/>
 	<!-- DO NOT USE XML SPECIAL CHARACTERS AS SEPARATORS: &lt; (<), &amp; (&), &gt; (>), &quot; ("), and &apos; (') -->
-	<separators timestamp=":" field="|" value=","/>
+  <!-- 
+		Tag values are serialized as strings using the pattern: timestamp<timestamp separator>value<value separator>timestamp<timestamp separator>value<value separator>[...]
+		Each value can consist in a set of fields (value, svalue, status) separated by <field separator>
+		As a result the pattern is as follows:
+		timestamp<timestamp separator>field<field separator>field<field separator>field<value separator>timestamp<timestamp separator>field<field separator>field<field separator>field<value separator>[...]
+		Example: 2018-10-16T01-30-22.000:85.46826172-:-2018-10-16T02-39-22.000:99.19163513-:-2018-10-16T03-44-22.000:96.29905701-:-2018-10-16T04-57-22.000:75.98847961-:-2018-10-16T07-30-52.000:14.37839985-:-2018-10-16T08-39-52.000:0.76978278-:-2018-10-16T09-44-52.000:3.78370595-:-2018-10-16T10-57-52.000:24.19803047-:-2018-10-16T13-31-22.000:85.77426147-:-2018-10-16T14-31-22.000:98.44711304-:-2018-10-16T15-31-22.000:98.13861847-:-2018-10-16T16-40-52.000:81.84907532-:-2018-10-16T19-33-22.000:13.62164593-:-2018-10-16T20-37-22.000:0.97221178-:-2018-10-16T21-42-22.000:3.37837267-:-2018-10-16T22-56-22.000:23.63940430-:-
+		<timestamp separator> = :
+		<value separator> = -:-
+		<field separator> = NA (not needed as we have to serialize only 1 value
+		timestamp: separates timestamp from value measurements related to the timestamp itself; CAN BE A STRING.
+		value: separates values related to different timestamps; CAN BE A STRING.
+		field: separates different components of a value related to a certain timestamp; CAN BE A STRING.
+	-->
+  <separators timestamp=":" field="|" value=","/>
 	<maildata enabled="true">
 		<smtphost></smtphost>
 		<from></from>
