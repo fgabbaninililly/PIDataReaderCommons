@@ -1,7 +1,9 @@
-﻿using NLog;
+﻿using Microsoft.Win32;
+using NLog;
 using PIDataReaderLib;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -35,16 +37,45 @@ namespace PIDataReaderCommons {
 
 		private LastReadStatusEnum lastReadStatus;
 
+		private string appRegistryKey;
+		private string knVersion;
+		private string knReleaseDate;
+
 		public PIDRController(string mainAssemblyVersionInfo, bool isWindowsService) {
+			appRegistryKey = ConfigurationManager.AppSettings["AppRegistryKey"];
+			knVersion = ConfigurationManager.AppSettings["KnVersion"];
+			knReleaseDate = ConfigurationManager.AppSettings["KnReleaseDate"];
+			
 			this.mainAssemblyVersionInfo = mainAssemblyVersionInfo;
 			this.piDataReaderLibVersionInfo = PIDataReaderLib.Version.getVersion();
 			pidrContext = new PIDRContext(isWindowsService);
+		}
+
+		private string getValueFromRegistryKey(string keyName) {
+			string keyValue = "undefined";
+			try { 
+				RegistryKey key = Registry.LocalMachine.OpenSubKey(appRegistryKey);
+				if (key != null) {
+					Object o = key.GetValue(keyName);
+					if (null != o) {
+						keyValue = (string)o;
+					} else {
+						logger.Warn("Unable to retrieve PIDataReader '{0}' from registry key '{1}'", keyName, appRegistryKey);
+					}
+				} else {
+					logger.Warn("Unable to retrieve PIDataReader '{0}' from registry key '{1}'", keyName, appRegistryKey);
+				}
+			} catch(Exception) {
+				logger.Warn("Unable to retrieve PIDtaReader registry key '{0}'", appRegistryKey);
+			}
+			return keyValue;
 		}
 
 		private int parseCommandLine(string[] args) {
 			options = new Options();
 			bool cmdLineParseOk = CommandLine.Parser.Default.ParseArguments(args, options);
 			if (options.Version) {
+				logger.Info("PIDataReader version (main assembly): {0}, released on: {1}", getValueFromRegistryKey(knVersion), getValueFromRegistryKey(knReleaseDate));
 				logger.Info("{0}", mainAssemblyVersionInfo);
 				logger.Info("{0}", Version.getVersion());
 				logger.Info("{0}", piDataReaderLibVersionInfo);
