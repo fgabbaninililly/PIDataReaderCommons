@@ -270,6 +270,7 @@ namespace PIDataReaderCommons {
 					foreach (EquipmentCfg equipmentCfg in config.read.equipments) {
 						logger.Info("====Equipment '{0}'", equipmentCfg.name);
 						List<ReadInterval> readIntervals = pidrContext.getNextReadIntervalsByEquipment()[equipmentCfg.name];
+						double eqmWriteTime = 0;
 						foreach (ReadInterval readInterval in readIntervals) {
 							logger.Info("======Time interval: [{0}, {1}]", readInterval.start.ToString(config.dateFormats.reference), readInterval.end.ToString(config.dateFormats.reference));
 							PIData piData = reader.readTags(equipmentCfg, readInterval);
@@ -281,13 +282,18 @@ namespace PIDataReaderCommons {
 								}
 								//fine if nuovo sdg
 								if (dumpReadsToLocalFiles) {
+									Stopwatch swatch = Stopwatch.StartNew();
 									fileWriter.writeTags(piData, equipmentCfg.name, appendToLocalFiles);
+									swatch.Stop();
+									eqmWriteTime += swatch.Elapsed.TotalSeconds;
+									logger.Info("====Time interval: data written to file in {0}s", swatch.Elapsed.TotalSeconds);
 								}
 								readInterval.lastReadWithSuccess = true;
 							} else {
 								readInterval.lastReadWithSuccess = false;
 							}
 						}
+						logger.Info("====Equipment {0}: data written to file in {1}s", equipmentCfg.name, eqmWriteTime);
 					}
 				}
 				readAndWriteCompleted();
