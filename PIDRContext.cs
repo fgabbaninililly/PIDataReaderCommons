@@ -119,6 +119,7 @@ namespace PIDataReaderCommons
 				reader = new Reader(
 					connection.getParameterValueByName(Parameter.PARAMNAME_PISERVERNAME),
 					connection.getParameterValueByName(Parameter.PARAMNAME_PISDKTYPE),
+					connection.getParameterValueByName(Parameter.PARAMNAME_PIBOUNDARY),
 					config.read.readBatches(),
 					config.dateFormats.reference,
 					config.dateFormats.pi,
